@@ -5,8 +5,6 @@ import json
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-url = "https://www.youtube.com/watch?v=H2r25lVcIHw"
-
 options = {
     "quiet": True,
     "geo_bypass": True,
@@ -26,8 +24,15 @@ class InfoModel(BaseModel):
     id: str
     title: str | None
     description: str | None
+
+    channel: str
     channel_id: str
     channel_url: str
+
+    uploader: str
+    uploader_id: str | None
+    uploader_url: str | None
+
     duration: int
     tags: list[str]
 
@@ -38,19 +43,23 @@ class InfoModel(BaseModel):
 @app.get("/youtube/info/{vid}")
 def info(vid: str):
     with yt_dlp.YoutubeDL(options) as ydl:
-        info = ydl.extract_info(url, download=False)
+        info = ydl.extract_info(f"https://youtube.com/watch?v={vid}", download=False)
 
         video_info: dict = next(f for f in info["requested_formats"] if f["vcodec"] != "none")
         audio_info: dict = next(f for f in info["requested_formats"] if f["acodec"] != "none")
 
         return InfoModel(
-            id          = vid,
-            title       = info.get("title"),
-            description = info.get("description"),
-            channel_id  = info["channel_id"],
-            channel_url = info["channel_url"],
+            id           = vid,
+            title        = info.get("title"),
+            description  = info.get("description"),
+            channel      = info["uploader"],
+            channel_id   = info["channel_id"],
+            channel_url  = info["channel_url"],
+            uploader     = info["uploader"],
+            uploader_id  = info.get("uploader_id"),
+            uploader_url = info.get("uploader_url"),
             duration    = info["duration"],
-            tags        = info["tags"],
+            tags         = info["tags"],
 
             video = StreamModel(
                 format_id = video_info["format_id"],

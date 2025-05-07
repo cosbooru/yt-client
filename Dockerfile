@@ -4,8 +4,9 @@ WORKDIR /yt-client
 RUN apt-get update && \
     apt-get install python3 python3-pip -y
 
-COPY . ./
+COPY requirements.txt ./
 RUN pip3 install -r requirements.txt --break-system-packages
+COPY server.py ./
 
 EXPOSE 6688
 ENTRYPOINT ["fastapi"]
