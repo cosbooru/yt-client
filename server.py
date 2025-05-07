@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import yt_dlp
-import json
 
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -39,9 +38,8 @@ class InfoModel(BaseModel):
     video: StreamModel
     audio: StreamModel
 
-
 @app.get("/youtube/info/{vid}")
-def info(vid: str):
+def info(vid: str) -> InfoModel:
     with yt_dlp.YoutubeDL(options) as ydl:
         info = ydl.extract_info(f"https://youtube.com/watch?v={vid}", download=False)
 
